@@ -26,11 +26,12 @@
 
 from libqtile.config import Key, Screen, Group, Drag, Click
 from libqtile.lazy import lazy
-from libqtile import layout, bar, widget
+from libqtile import layout, bar, widget, hook
 
 from typing import List  # noqa: F401
 
 from os import listdir,path
+import subprocess
 
 import json
 
@@ -44,7 +45,14 @@ theme_path = path.join(qtile_path,"themes",theme)
 with open(path.join(theme_path,"colors.json")) as f:
     colors = json.load(f)
 
+# AUTOSTART
+@hook.subscribe.startup_once
+def autostart():
+#    home = path.expanduser('~/.config/qtile/autostart.sh')
+    home = path.join(qtile_path, "autostart.sh")
+    subprocess.call([home])
 
+# KEYS
 mod = "mod4"
 keys = [
     # Switch between windows in current stack pane
@@ -128,18 +136,18 @@ screens = [
     Screen(
         top=bar.Bar(
             [
-                widget.Sep(linewidth=4,foreground=colors['dark']),
-                widget.CurrentLayout(),
-                widget.Sep(linewidth=4,foreground=colors['dark']),
+                widget.Sep(linewidth=4,background=colors['secondary'],foreground=colors['secondary']),
+                widget.CurrentLayout(background=colors['secondary']),
+                widget.Sep(linewidth=4,background=colors['secondary'],foreground=colors['secondary']),
                 widget.GroupBox(background=colors['primary']),
                 widget.Prompt(foreground=colors['extra']),
                 widget.Sep(linewidth=4,foreground=colors['dark']),
                 widget.WindowName(),
-                widget.TextBox(colors['primary'], name="default"),
-                widget.Systray(background=colors['dark'],icon_size=20),
                 widget.Pomodoro(length_pomodori=5),
+                widget.TextBox("adelante!",background=colors['secondary'], name="default"),
+                widget.Systray(background=colors['dark'],icon_size=20),
                 widget.Clock(background=colors['primary'],format='%d-%m-%Y %a %I:%M %p'),
-                widget.KeyboardLayout(),
+                widget.KeyboardLayout(background=colors['secondary'],configured_keyboards=['es','us']),
                 widget.Sep(linewidth=4,foreground=colors['dark']),
             ],
             24,

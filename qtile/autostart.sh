@@ -1,4 +1,5 @@
 #!/bin/sh
 
-# systray battery icon
-cbatticon -u 5 &
+# set background image
+feh --randomize --bg-scale ~/Images/Wallpapers/* &
+setxkbmap es &
