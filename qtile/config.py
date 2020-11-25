@@ -33,24 +33,19 @@ from typing import List  # noqa: F401
 from os import listdir,path
 import subprocess
 
-import json
-
-qtile_path = path.join(path.expanduser("~"),".config","qtile")
-
-# THEME
-theme = "dracula" #only if available in ~/.conf/qtile/themes
-theme_path = path.join(qtile_path,"themes",theme)
-
-# map color name to hex values
-with open(path.join(theme_path,"colors.json")) as f:
-    colors = json.load(f)
-
 # AUTOSTART
 @hook.subscribe.startup_once
 def autostart():
-#    home = path.expanduser('~/.config/qtile/autostart.sh')
-    home = path.join(qtile_path, "autostart.sh")
-    subprocess.call([home])
+    subprocess.call(["/home/el_vengador/.config/qtile/autostart.sh"])
+
+# COLORS
+colors={
+	"primary":"#FF5C4D",
+	"secondary":"#FF9636",
+	"dark":"#382445",
+	"light":"#FFCD58",
+	"extra":"#DAD870"
+}
 
 # KEYS
 mod = "mod4"
@@ -86,7 +81,7 @@ keys = [
 ]
 
 # GROUPS
-groups = [Group(i) for i in ["NET","DEV","TERM","FS","MEDIA","MISC"]]
+groups = [Group(i) for i in ["NET","DEV1","DEV2","FS","MEDIA","MISC"]]
 
 for i in range(len(groups)):
     #cada workspace es identificado por un numero comenzando en 1
@@ -104,9 +99,9 @@ for i in range(len(groups)):
 
 # LAYOUTS
 layout_conf = {
-    'border_focus':colors['primary'],
-    'border_width':1,
-    'margin':4
+    'border_focus':colors['secondary'],
+    'border_width':2,
+    'margin':2
 }
 
 layouts = [
@@ -119,7 +114,7 @@ layouts = [
     layout.MonadTall(**layout_conf),
     layout.MonadWide(**layout_conf),
     # layout.RatioTile(),
-    # layout.Tile(),
+    layout.Tile(**layout_conf),
     # layout.TreeTab(),
     # layout.VerticalTile(),
     # layout.Zoomy(),
@@ -131,37 +126,63 @@ widget_defaults = dict(
     padding=3,
 )
 extension_defaults = widget_defaults.copy()
+fortune = "..."
+# MOUSE CALLBACKS
+def get_fortune(qtile):
+    qtile.cmd_spawn('fortune')
+def open_dolphin(qtile):
+    qtile.cmd_spawn('dolphin')
+def screenshoot_window(qtile):
+    qtile.cmd_spawn('scrot -s')
+def screenshoot(qtile):
+    qtile.cmd_spawn('scrot')
+def update(qtile):
+    qtile.cmd_spawn('alacritty -e sudo pacman -Syu')
+def htop(qtile):
+    qtile.cmd_spawn('alacritty -e htop')
+def open_albert(qtile):
+    qtile.cmd_spawn('albert')
 
 screens = [
     Screen(
         top=bar.Bar(
-            [
-                widget.Sep(linewidth=4,background=colors['secondary'],foreground=colors['secondary']),
+            [            
+                # Current layout
+                widget.TextBox("",fontsize=28,background=colors['secondary']),
                 widget.CurrentLayout(background=colors['secondary']),
-                widget.Sep(linewidth=4,background=colors['secondary'],foreground=colors['secondary']),
+                # Groups
                 widget.GroupBox(background=colors['primary']),
+                # Terminal
                 widget.Prompt(foreground=colors['extra']),
-                widget.Sep(linewidth=4,foreground=colors['dark']),
-                widget.WindowName(),
-                widget.Pomodoro(length_pomodori=5),
-                widget.TextBox("adelante!",background=colors['secondary'], name="default"),
-                widget.Systray(background=colors['dark'],icon_size=20),
+                # Window name
+                widget.Sep(linewidth=4,background=colors['dark'],foreground=colors['dark']),
+                widget.WindowName(background=colors['dark']),
+                widget.Sep(linewidth=4,background=colors['dark'],foreground=colors['dark']),
+                # Ethernet
+                widget.Net(interface="enp4s0",background=colors['secondary'],format="{down} ↓↑ {up}"),
+                widget.TextBox("",fontsize=28,background=colors['secondary']),
+                # Memory
+                widget.Memory(background=colors['primary']),
+                widget.TextBox("",fontsize=28,background=colors['primary'],mouse_callbacks={'Button1':htop}),
+                # Phrace
+                widget.TextBox("理",fontsize=28,background=colors['secondary'],mouse_callbacks={'Button1':open_albert}),
+                # Update
+                widget.Pacman(background=colors['primary']),
+                widget.TextBox("ﮮ",fontsize=28,background=colors['primary'],mouse_callbacks={'Button1':update}),
+                # Screen shoot
+                widget.TextBox("",fontsize=28,background=colors['secondary'],mouse_callbacks={'Button1':screenshoot}),
+                widget.TextBox("",fontsize=28,background=colors['primary'],mouse_callbacks={'Button1':screenshoot_window}),
+                # File Manager
+                widget.TextBox("",fontsize=28,background=colors['secondary'],mouse_callbacks={'Button1':open_dolphin}),
+                # Date
                 widget.Clock(background=colors['primary'],format='%d-%m-%Y %a %I:%M %p'),
-                widget.KeyboardLayout(background=colors['secondary'],configured_keyboards=['es','us']),
-                widget.Sep(linewidth=4,foreground=colors['dark']),
+                widget.TextBox("",fontsize=28,background=colors['primary']),
+                # Language
+                widget.KeyboardLayout(background=colors['secondary'],configured_keyboards=['es','us'],padding_x=6)
             ],
             24,
         ),
     ),
-]
-
-# Drag floating layouts.
-mouse = [
-    Drag([mod], "Button1", lazy.window.set_position_floating(),
-         start=lazy.window.get_position()),
-    Drag([mod], "Button3", lazy.window.set_size_floating(),
-         start=lazy.window.get_size()),
-    Click([mod], "Button2", lazy.window.bring_to_front())
 ]
 
 dgroups_key_binder = None

@@ -1,0 +1,5 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhistcnt =3
+let g:netrw_dirhist_3='/home/el_vengador/.config/qutebrowser'
+let g:netrw_dirhist_2='/home/el_vengador/.local/share/DaVinciResolve/logs/LogArchive'
+let g:netrw_dirhist_1='/home/el_vengador/.local/share/DaVinciResolve/logs'
